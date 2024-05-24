@@ -6,7 +6,7 @@
 /*   By: ribana-b <ribana-b@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/23 19:19:08 by ribana-b          #+#    #+# Malaga      */
-/*   Updated: 2024/05/25 01:13:53 by ribana-b         ###   ########.com      */
+/*   Updated: 2024/05/25 01:44:41 by ribana-b         ###   ########.com      */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #define Y0 200
 #define FPS 60
 #define PRINT_HEX(COLOR) "#%02X%02X%02X", (COLOR).r, (COLOR).g, (COLOR).b
+#define PRINT_RGB(COLOR) "(%u, %u, %u)", (COLOR).r, (COLOR).g, (COLOR).b
 
 typedef struct
 {
@@ -38,6 +39,7 @@ void	draw_left_rectangle(MyColor *color)
 	static Vector2 currentPosition = {X0, Y0};
 	Vector3 hsv = ColorToHSV(color->current);
 
+	// Set the text color depending on the "theme"
 	if (color->isDark) color->text = GetColor(0x303030FF);
 	else color->text = GetColor(0x696969FF);
 
@@ -55,17 +57,13 @@ void	draw_left_rectangle(MyColor *color)
 	{
 		if (IsMouseButtonDown(MOUSE_BUTTON_LEFT))
 			currentPosition = GetMousePosition();
-		if ((IsKeyPressed(KEY_W) || (IsKeyDown(KEY_W) && IsKeyDown(KEY_LEFT_SHIFT)))
-			&& currentPosition.y > Y0)
+		if ((IsKeyPressed(KEY_W) || (IsKeyDown(KEY_W) && IsKeyDown(KEY_LEFT_SHIFT))) && currentPosition.y > Y0)
 			currentPosition.y -= 1;
-		if ((IsKeyPressed(KEY_S) || (IsKeyDown(KEY_S) && IsKeyDown(KEY_LEFT_SHIFT)))
-			&& currentPosition.y < Y0 + 360)
+		if ((IsKeyPressed(KEY_S) || (IsKeyDown(KEY_S) && IsKeyDown(KEY_LEFT_SHIFT))) && currentPosition.y < Y0 + 360)
 			currentPosition.y += 1;
-		if ((IsKeyPressed(KEY_A) || (IsKeyDown(KEY_A) && IsKeyDown(KEY_LEFT_SHIFT)))
-			&& currentPosition.x > X0)
+		if ((IsKeyPressed(KEY_A) || (IsKeyDown(KEY_A) && IsKeyDown(KEY_LEFT_SHIFT))) && currentPosition.x > X0)
 			currentPosition.x -= 1;
-		if ((IsKeyPressed(KEY_D) || (IsKeyDown(KEY_D) && IsKeyDown(KEY_LEFT_SHIFT)))
-			&& currentPosition.x < X0 + 360)
+		if ((IsKeyPressed(KEY_D) || (IsKeyDown(KEY_D) && IsKeyDown(KEY_LEFT_SHIFT))) && currentPosition.x < X0 + 360)
 			currentPosition.x += 1;
 		if (showValue) color->text = color->foreground;
 	}
@@ -88,11 +86,13 @@ void	draw_right_rectangle(MyColor *color)
 						currentPosition.y - 2.5, 50, 5};
 	Vector3 hsv = ColorToHSV(color->current);
 
+	// Set the text color depending on the "theme"
+	if (color->isDark) color->text = GetColor(0x303030FF);
+	else color->text = GetColor(0x696969FF);
 
 	// Set the Hue
 	color->current = ColorFromHSV(currentPosition.y - 200.0f, hsv.y, hsv.z);
-	if (color->isDark) color->text = GetColor(0x303030FF);
-	else color->text = GetColor(0x696969FF);
+
 	// Draw first 3 sections (From red to cyan)
 	DrawRectangleGradientV(X0 + offset.x, Y0 + size * 0, 50, size, GetColor(0xFF0000FF), GetColor(0xFFFF00FF));
 	DrawRectangleGradientV(X0 + offset.x, Y0 + size * 1, 50, size + 0.5, GetColor(0xFFFF00FF), GetColor(0x00FF00FF));
@@ -138,8 +138,7 @@ void	draw_switch_theme_button(MyColor *color)
 		color->background = RAYWHITE;
 		color->foreground = BLACK;
 	}
-	if (CheckCollisionPointCircle(GetMousePosition(), center, radius)
-		&& IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+	if (CheckCollisionPointCircle(GetMousePosition(), center, radius) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 			color->isDark = !color->isDark;
 }
 
@@ -153,6 +152,7 @@ int	main(void)
 		.current = GetColor(0XFF0000FF),
 		.isDark = true,
 	};
+	bool isHex = true;
 	InitWindow(WIDTH, HEIGHT, "ColorPicker");
 	SetTargetFPS(FPS);
 	while (!WindowShouldClose())
@@ -164,7 +164,16 @@ int	main(void)
 			draw_right_rectangle(&color);
 			draw_switch_theme_button(&color);
 			DrawRectangle(X0 + 45, 42, 30, 30, color.current);
-			DrawText(TextFormat(PRINT_HEX(color.current)), X0 + 100, 40, 32, color.foreground);
+			if (CheckCollisionPointRec(GetMousePosition(), (Rectangle){X0 + 45, 40, 255 + 60, 32}) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+			{
+				// Copy the color
+				if (isHex) SetClipboardText(TextFormat(PRINT_HEX(color.current)));
+				else SetClipboardText(TextFormat(PRINT_RGB(color.current)));
+				if (IsKeyDown(KEY_LEFT_SHIFT))
+					isHex = !isHex;
+			}
+			if (isHex) DrawText(TextFormat(PRINT_HEX(color.current)), X0 + 100, 40, 32, color.foreground);
+			else DrawText(TextFormat(PRINT_RGB(color.current)), X0 + 100, 40, 32, color.foreground);
 			if (IsKeyPressed(KEY_SPACE)) showValue = !showValue;
 		}
 		EndDrawing();
