@@ -6,7 +6,7 @@
 /*   By: ribana-b <ribana-b@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/23 19:19:08 by ribana-b          #+#    #+# Malaga      */
-/*   Updated: 2024/05/25 16:52:29 by ribana-b         ###   ########.com      */
+/*   Updated: 2024/05/26 00:54:09 by ribana-b         ###   ########.com      */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,12 @@ void	draw_input_box(MyColor *color)
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 		{
 			const char *buffer = GetClipboardText();
+			if (buffer) memcpy(text, buffer, 32);
 		}
 		else if (IsKeyPressed(KEY_DELETE))
 			memset(text, 0, sizeof(text));
 	}
-		DrawText(TextFormat(" %s", text), X0 + 50, Y0 - 100, 32, color->background);
+	DrawText(TextFormat(" %s", text), X0 + 50, Y0 - 100, 32, color->background);
 }
 
 void	draw_left_rectangle(MyColor *color)
