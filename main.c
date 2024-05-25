@@ -6,7 +6,7 @@
 /*   By: ribana-b <ribana-b@student.42malaga.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/23 19:19:08 by ribana-b          #+#    #+# Malaga      */
-/*   Updated: 2024/05/25 10:20:53 by ribana-b         ###   ########.com      */
+/*   Updated: 2024/05/25 16:52:29 by ribana-b         ###   ########.com      */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,22 +49,16 @@ void	draw_input_box(MyColor *color)
 		if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 		{
 			const char *buffer = GetClipboardText();
-			if (buffer) memcpy(text, buffer, strlen(buffer));
 		}
 		else if (IsKeyPressed(KEY_DELETE))
 			memset(text, 0, sizeof(text));
 	}
-	if (text[0])
 		DrawText(TextFormat(" %s", text), X0 + 50, Y0 - 100, 32, color->background);
 }
 
 void	draw_left_rectangle(MyColor *color)
 {
 	Rectangle rec = {X0, Y0, 360, 360};
-	Rectangle upLeftRec = {X0, Y0, 180, 180};
-	Rectangle upRightRec = {X0 + 180, Y0, 180, 180};
-	Rectangle downLeftRec = {X0, Y0 + 180, 180, 180};
-	Rectangle downRightRec = {X0 + 180, Y0 + 180, 180, 180};
 	float radius = 5;
 	Vector3 hsv = ColorToHSV(color->current);
 
@@ -81,11 +75,9 @@ void	draw_left_rectangle(MyColor *color)
 
 	hsv.x = color->rightRecPosition.y - 200;
 	// Draw the main rectangle
-	DrawRectangleGradientEx(upLeftRec, ColorFromHSV(hsv.x, 0.0, 1.0), ColorFromHSV(hsv.x, 0.0, 0.5), ColorFromHSV(hsv.x, 0.5, 0.5), ColorFromHSV(hsv.x, 0.5, 1.0));
-	DrawRectangleGradientEx(upRightRec, ColorFromHSV(hsv.x, 0.5, 1.0), ColorFromHSV(hsv.x, 0.5, 0.5), ColorFromHSV(hsv.x, 1.0, 0.5), ColorFromHSV(hsv.x, 1.0, 1.0));
-	DrawRectangleGradientEx(downLeftRec, ColorFromHSV(hsv.x, 0.0, 0.5), ColorFromHSV(hsv.x, 0.0, 0.0), ColorFromHSV(hsv.x, 0.5, 0.0), ColorFromHSV(hsv.x, 0.5, 0.5));
-	DrawRectangleGradientEx(downRightRec, ColorFromHSV(hsv.x, 0.5, 0.5), ColorFromHSV(hsv.x, 0.5, 0.0), ColorFromHSV(hsv.x, 1.0, 0.0), ColorFromHSV(hsv.x, 1.0, 0.5));
-
+	DrawRectangleRec(rec, ColorFromHSV(hsv.x, 1.0, 1.0));
+	DrawRectangleGradientH(rec.x, rec.y, rec.width, rec.height, WHITE, BLANK);
+	DrawRectangleGradientV(rec.x, rec.y, rec.width, rec.height, BLANK, BLACK);
 	DrawRectangleLinesEx(rec, 1, color->foreground);
 
 	// Move the circle "pointer" when the cursor collides with the main rectangle
@@ -127,16 +119,13 @@ void	draw_right_rectangle(MyColor *color)
 	// Set the Hue
 	color->current = ColorFromHSV(color->rightRecPosition.y - 200.0f, hsv.y, hsv.z);
 
-	// Draw first 3 sections (From red to cyan)
+	// Draw the main rectangle
 	DrawRectangleGradientV(X0 + offset.x, Y0 + size * 0, 50, size, GetColor(0xFF0000FF), GetColor(0xFFFF00FF));
 	DrawRectangleGradientV(X0 + offset.x, Y0 + size * 1, 50, size + 0.5, GetColor(0xFFFF00FF), GetColor(0x00FF00FF));
 	DrawRectangleGradientV(X0 + offset.x, Y0 + size * 2, 50, size, GetColor(0x00FF00FF), GetColor(0x00FFFFFF));
-
-	// Draw last 3 sections (From cyan to red)
 	DrawRectangleGradientV(X0 + offset.x, Y0 + size * 3, 50, size + 0.5, GetColor(0x00FFFFFF), GetColor(0x0000FFFF));
 	DrawRectangleGradientV(X0 + offset.x, Y0 + size * 4, 50, size, GetColor(0x0000FFFF), GetColor(0xFF00FFFF));
 	DrawRectangleGradientV(X0 + offset.x, Y0 + size * 5, 50, size, GetColor(0xFF00FFFF), GetColor(0xFF0000FF));
-
 	DrawRectangleLinesEx(rec, 1, color->foreground);
 
 	// Move the rectangle "pointer" when the cursor is colliding with the main rectangle
@@ -164,28 +153,26 @@ void	draw_switch_theme_button(MyColor *color)
 
 	if (color->isDark)
 	{
-		DrawCircleV(center, 10, color->foreground);
 		color->background = BLACK;
 		color->foreground = RAYWHITE;
 	}
 	else
 	{
-		DrawCircleV(center, radius, color->foreground);
 		color->background = RAYWHITE;
 		color->foreground = BLACK;
 	}
 	if (CheckCollisionPointCircle(GetMousePosition(), center, radius) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 			color->isDark = !color->isDark;
+	DrawCircleV(center, radius, color->foreground);
 }
 
 int	main(void)
 {
-	Rectangle rec = {200, 200, 100, 100};
 	MyColor color = {
 		.background = WHITE,
 		.foreground = GetColor(0x696969FF),
 		.text = RAYWHITE,
-		.current = GetColor(0XFF0000FF),
+		.current = GetColor(0xFF0000FF),
 		.isDark = true,
 		.leftRecPosition = {X0, Y0},
 		.rightRecPosition = {X0 + 300, Y0},

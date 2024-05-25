@@ -1,7 +1,7 @@
 NAME = ColorPicker
 
 CC = gcc
-CFLAGS = #-Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror
 CPPFLAGS = -I./ -I$(RAYLIB_DIR)/include
 LDFLAGS = -L$(RAYLIB_DIR)/lib
 
