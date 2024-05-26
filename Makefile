@@ -3,12 +3,11 @@ NAME = ColorPicker
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
 CPPFLAGS = -I./ -I$(RAYLIB_DIR)/include
-LDFLAGS = -L$(RAYLIB_DIR)/lib
 
 ifeq ($(OS), Windows_NT)
 	LDLIBS = $(RAYLIB_DIR)/lib/libraylib.a -lgdi32 -lwinmm
 else
-	LDLIBS = -lraylib -lGL -lm
+	LDLIBS = $(RAYLIB_DIR)/lib/libraylib.a -lGL -lm
 endif
 
 ifeq ($(OS), Windows_NT)
@@ -22,7 +21,7 @@ FILES = main.c
 all: $(NAME)
 
 $(NAME): $(FILES)
-	$(CC) $(FILES) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $(LDLIBS) -o $(NAME)
+	$(CC) $(FILES) $(CFLAGS) $(CPPFLAGS) $(LDLIBS) -o $(NAME)
 
 clean:
 ifeq ($(OS), Windows_NT)
